@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var request = require('request');
+var beautify = require("json-beautify");
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -21,19 +23,61 @@ router.get('/', function(req, res, next) {
   //   api.setDebug(true);
   // }
 
-const curl = new (require( 'curl-request' ))();
+  var url ='act_419982481666289/campaigns?fields=name,configured_status,effective_status,id,objective,adsets{daily_budget,insights{cost_per_total_action},effective_status},start_time&access_token=EAADk9eCPSSEBAJACTybjL7ZCCHmjqTeM5VCIsZAhJcLXhEnU4ZAsc5aRfaAKkuBCS8eMsIsB1ZBkgArY73T7dZANJH0ll9T1SL9NinZCn9dHKnKSQZCEHpUKKZAvDpyPXlwCA2IOaoBMkGlnwTqY7ZAvlJC5XD3dhZA2g1Ko0NonlS8QZDZD';
+
+  var urlPath = 'https://graph.facebook.com/v3.0';
+  var accountId = 'act_419982481666289';
+  var query = 'act_419982481666289/campaigns?fields=name,configured_status,effective_status,id,objective,adsets{daily_budget,insights{cost_per_total_action},effective_status},start_time&access_token=EEAADk9eCPSSEBAJACTybjL7ZCCHmjqTeM5VCIsZAhJcLXhEnU4ZAsc5aRfaAKkuBCS8eMsIsB1ZBkgArY73T7dZANJH0ll9T1SL9NinZCn9dHKnKSQZCEHpUKKZAvDpyPXlwCA2IOaoBMkGlnwTqY7ZAvlJC5XD3dhZA2g1Ko0NonlS8QZDZD';
+      //
+      // request(urlPath + '/' + accountId + '/' + query , function(error, response, body) {
+      //   console.log('body', beautify(body, null, 2, 100));
+      // });
+
+        var firstUrl = urlPath + '/' + url;
+        function getParce(urlPath) {
+
+          request(urlPath, (err, res, body) => {
+            // console.log(body);
+
+            var jsonObj = JSON.parse(body);
+
+          console.log(jsonObj);
+          for (var key in jsonObj.data) {
+            if (jsonObj.data[key].effective_status == 'PAUSED') {
+              continue;
+            }
+          if (jsonObj.data.hasOwnProperty(key)) {
+            console.log(jsonObj.data[key].name);
+
+            for (var adset in jsonObj.data[key].adsets.data) {
+              if (jsonObj.data[key].adsets.data[adset].effective_status == 'PAUSED') {
+                continue;
+              }
+              console.log(jsonObj.data[key].adsets.data[adset].id);
+            }
+            // alert(json[key].msg);
+            //
+            // for (var key in jsonObj.data) {
+            //   if (jsonObj.data.hasOwnProperty(key)) {
+            //     if (jsonObj.data[key].adsets.effective_status != 'PAUSED') {
+            //       continue;
+            //     }
+            //     console.log(jsonObj.data[key].adsets);
+              // }
+            }
+          }
+
+          if (jsonObj.paging.next != null) {
+            return jsonObj.paging.next;
+
+          }
+        });
+      }
+
+      var token = getParce(firstUrl);
+      console.log('token : ', token);
 
 
- curl.setHeaders([
-     'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'
- ])
- .get('https://www.google.com')
- .then(({statusCode, body, headers}) => {
-     console.log(statusCode, body, headers)
- })
- .catch((e) => {
-     console.log(e);
- });
 
   res.render('index', { title: 'Express' });
   });
